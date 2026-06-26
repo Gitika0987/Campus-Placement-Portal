@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — Placement Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0f1117;--surface:#1a1d27;--border:#2a2d3a;--accent:#6c63ff;--accent2:#00d4aa;
+      --text:#e8e9f0;--muted:#7b7e8f;--danger:#ff6b6b;--success:#00d4aa;--warning:#ffb347;
+      --radius:12px;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;}
+    header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;}
+    .logo{font-size:1.1rem;font-weight:600;}.logo span{color:var(--warning);}
+    .server-badge{font-family:var(--mono);font-size:0.75rem;background:#1e2235;border:1px solid var(--border);padding:4px 10px;border-radius:20px;color:var(--accent2);}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:0.9rem;transition:color 0.2s;}.nav-links a:hover{color:var(--text);}
+    .layout{display:grid;grid-template-columns:320px 1fr;max-width:1200px;margin:0 auto;padding:2rem;gap:2rem;}
+    @media(max-width:768px){.layout{grid-template-columns:1fr;}}
+    .sidebar{display:flex;flex-direction:column;gap:1.5rem;}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;}
+    .card h2{font-size:0.95rem;font-weight:600;margin-bottom:1.25rem;display:flex;align-items:center;gap:0.5rem;}
+    .form-group{margin-bottom:1rem;}
+    .form-group label{display:block;font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+    .form-group input,.form-group textarea,.form-group select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.65rem 0.9rem;color:var(--text);font-family:var(--font);font-size:0.875rem;outline:none;transition:border-color 0.2s;resize:vertical;}
+    .form-group input:focus,.form-group textarea:focus{border-color:var(--accent);}
+    .form-group textarea{min-height:80px;}
+    .btn-post{width:100%;padding:0.75rem;background:var(--warning);color:#1a1200;border:none;border-radius:8px;font-family:var(--font);font-size:0.875rem;font-weight:600;cursor:pointer;transition:opacity 0.2s;}
+    .btn-post:hover{opacity:0.88;}
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;}
+    .stat-card .label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
+    .stat-card .value{font-size:1.6rem;font-weight:600;}
+    .tabs{display:flex;gap:0;margin-bottom:1rem;border-bottom:1px solid var(--border);}
+    .tab{padding:0.6rem 1.25rem;font-size:0.875rem;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color 0.2s,border-color 0.2s;}
+    .tab.active{color:var(--text);border-color:var(--accent);}
+    .table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);}
+    table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+    thead{background:var(--surface);}
+    th{padding:0.75rem 1rem;text-align:left;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border);}
+    td{padding:0.75rem 1rem;border-bottom:1px solid var(--border);color:var(--text);}
+    tbody tr:last-child td{border-bottom:none;}
+    tbody tr:hover td{background:rgba(108,99,255,0.04);}
+    .cgpa-badge{font-family:var(--mono);font-size:0.78rem;padding:2px 8px;border-radius:4px;}
+    .cgpa-high{background:rgba(0,212,170,0.1);color:var(--success);border:1px solid rgba(0,212,170,0.2);}
+    .cgpa-mid{background:rgba(255,179,71,0.1);color:var(--warning);border:1px solid rgba(255,179,71,0.2);}
+    .cgpa-low{background:rgba(255,107,107,0.1);color:var(--danger);border:1px solid rgba(255,107,107,0.2);}
+    .port-pill{font-family:var(--mono);font-size:0.72rem;background:rgba(108,99,255,0.1);border:1px solid rgba(108,99,255,0.2);color:var(--accent);padding:2px 6px;border-radius:4px;}
+    .toast{position:fixed;bottom:2rem;right:2rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.5rem;font-size:0.875rem;z-index:300;transform:translateY(100px);opacity:0;transition:all 0.3s ease;max-width:320px;}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .toast.success{border-color:var(--success);color:var(--success);}
+    .toast.error{border-color:var(--danger);color:var(--danger);}
+    .spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;margin:2rem auto;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .empty{text-align:center;padding:3rem;color:var(--muted);font-size:0.875rem;}
+  </style>
+</head>
+<body>
+<header>
+  <div class="logo">Admin <span>Dashboard</span></div>
+  <nav class="nav-links"><a href="index.html">← Student Portal</a></nav>
+  <div class="server-badge" id="serverBadge">connecting...</div>
+</header>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="card">
+      <h2>📋 Post New Job</h2>
+      <div class="form-group"><label>Job Title</label><input type="text" id="fTitle" placeholder="e.g. Software Engineer"/></div>
+      <div class="form-group"><label>Company</label><input type="text" id="fCompany" placeholder="e.g. Infosys"/></div>
+      <div class="form-group"><label>Description</label><textarea id="fDesc" placeholder="Job description..."></textarea></div>
+      <div class="form-group"><label>Location</label><input type="text" id="fLocation" placeholder="e.g. Bangalore"/></div>
+      <div class="form-group"><label>Package (LPA)</label><input type="number" id="fPackage" placeholder="e.g. 9.5" step="0.1"/></div>
+      <div class="form-group"><label>Application Deadline</label><input type="date" id="fDeadline"/></div>
+      <button class="btn-post" onclick="postJob()">Post Job</button>
+    </div>
+    <div class="card">
+      <h2>🖥️ Server Monitor</h2>
+      <p style="font-size:0.82rem;color:var(--muted);line-height:1.6;margin-bottom:1rem;">
+        Each API call may be handled by a different backend instance.
+        Watch the port numbers change — that's your load balancer working!
+      </p>
+      <div id="requestLog" style="font-family:var(--mono);font-size:0.75rem;color:var(--muted);max-height:180px;overflow-y:auto;line-height:2;">
+        <div>Waiting for requests...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-panel">
+    <div class="stats-row">
+      <div class="stat-card"><div class="label">Total Jobs</div><div class="value" id="statJobs" style="color:var(--accent)">—</div></div>
+      <div class="stat-card"><div class="label">Applications</div><div class="value" id="statApps" style="color:var(--accent2)">—</div></div>
+      <div class="stat-card"><div class="label">Last Served By</div><div class="value" id="statPort" style="font-family:var(--mono);font-size:1rem;color:var(--warning)">—</div></div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('applications', this)">Applications</div>
+      <div class="tab" onclick="switchTab('jobs', this)">Job Listings</div>
+    </div>
+
+    <div id="tabApplications">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Student</th><th>Phone</th><th>Roll No.</th><th>CGPA</th><th>Resume</th><th>Job</th><th>Company</th><th>Applied On</th></tr></thead>
+          <tbody id="appsTableBody"><tr><td colspan="9"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tabJobs" style="display:none">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Title</th><th>Company</th><th>Location</th><th>Package</th><th>Deadline</th><th>Applications</th></tr></thead>
+          <tbody id="jobsTableBody"><tr><td colspan="7"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+//const API = "http://localhost:8080";
+  const API = "http://34.201.114.6:8080";
+let requestLog = [];
+
+function logRequest(endpoint, port) {
+  const time = new Date().toLocaleTimeString();
+  requestLog.unshift(`${time}  ${endpoint}  →  :${port}`);
+  if (requestLog.length > 12) requestLog.pop();
+  document.getElementById("requestLog").innerHTML = requestLog.map(l => `<div>${l}</div>`).join("");
+}
+
+async function fetchStats() {
+  try {
+    const res = await fetch(`${API}/api/stats`);
+    const data = await res.json();
+    document.getElementById("statJobs").textContent = data.total_jobs;
+    document.getElementById("statApps").textContent = data.total_applications;
+    document.getElementById("statPort").textContent = `:${data.server_port}`;
+    document.getElementById("serverBadge").textContent = `served by :${data.server_port}`;
+    logRequest("/api/stats", data.server_port);
+  } catch {}
+}
+
+async function fetchApplications() {
+  try {
+    const res = await fetch(`${API}/api/admin/applications`);
+    const data = await res.json();
+    logRequest("/api/admin/applications", data.served_by_port);
+    const tbody = document.getElementById("appsTableBody");
+    if (!data.applications.length) {
+      tbody.innerHTML = `<tr><td colspan="9"><div class="empty">No applications yet</div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.applications.map((a, i) => {
+      const cgpaClass = a.cgpa >= 8.5 ? "cgpa-high" : a.cgpa >= 7 ? "cgpa-mid" : "cgpa-low";
+      const date = a.applied_at.split("T")[0];
+      const resumeLink = a.resume_filename
+        ? `<a href="${API}/api/resumes/${a.resume_filename}" target="_blank" style="color:var(--accent);text-decoration:none;font-size:0.8rem;">📄 Download</a>`
+        : `<span style="color:var(--muted);font-size:0.8rem">—</span>`;
+      return `<tr>
+        <td style="color:var(--muted)">${i+1}</td>
+        <td><div style="font-weight:500">${a.student_name}</div><div style="font-size:0.78rem;color:var(--muted)">${a.email}</div></td>
+        <td style="font-family:var(--mono);font-size:0.8rem">${a.phone_number || '—'}</td>
+        <td style="font-family:var(--mono);font-size:0.8rem">${a.roll_number}</td>
+        <td><span class="cgpa-badge ${cgpaClass}">${a.cgpa}</span></td>
+        <td>${resumeLink}</td>
+        <td>${a.job_title}</td>
+        <td>${a.company}</td>
+        <td style="color:var(--muted);font-size:0.8rem">${date}</td>
+      </tr>`;
+    }).join("");
+  } catch {}
+}
+
+async function fetchJobs() {
+  try {
+    const res = await fetch(`${API}/api/jobs`);
+    const data = await res.json();
+    logRequest("/api/jobs", data.served_by_port);
+    const tbody = document.getElementById("jobsTableBody");
+    if (!data.jobs.length) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty">No jobs yet</div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.jobs.map((j, i) => `<tr>
+      <td style="color:var(--muted)">${i+1}</td>
+      <td style="font-weight:500">${j.title}</td>
+      <td>${j.company}</td>
+      <td>${j.location}</td>
+      <td style="color:var(--accent2)">${j.package_lpa} LPA</td>
+      <td style="color:var(--muted);font-size:0.8rem">${j.deadline}</td>
+      <td><span class="port-pill">${j.application_count}</span></td>
+    </tr>`).join("");
+  } catch {}
+}
+
+async function postJob() {
+  const payload = {
+    title: document.getElementById("fTitle").value.trim(),
+    company: document.getElementById("fCompany").value.trim(),
+    description: document.getElementById("fDesc").value.trim(),
+    location: document.getElementById("fLocation").value.trim(),
+    package_lpa: parseFloat(document.getElementById("fPackage").value),
+    deadline: document.getElementById("fDeadline").value,
+  };
+  for (const [k, v] of Object.entries(payload)) {
+    if (!v && v !== 0) { showToast(`Fill in: ${k}`, "error"); return; }
+  }
+  try {
+    const res = await fetch(`${API}/api/admin/jobs`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast(`Job posted! (served by :${data.served_by_port})`, "success");
+      logRequest("/api/admin/jobs", data.served_by_port);
+      ["fTitle","fCompany","fDesc","fLocation","fPackage","fDeadline"].forEach(id => { document.getElementById(id).value = ""; });
+      fetchJobs(); fetchStats();
+    } else { showToast(data.error || "Failed to post job", "error"); }
+  } catch { showToast("Cannot reach server", "error"); }
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("tabApplications").style.display = tab === "applications" ? "" : "none";
+  document.getElementById("tabJobs").style.display = tab === "jobs" ? "" : "none";
+}
+
+function showToast(msg, type = "success") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove("show"), 3500);
+}
+
+fetchStats(); fetchApplications(); fetchJobs();
+setInterval(() => { fetchStats(); fetchApplications(); }, 8000);
+</script>
+</body>
+</html>

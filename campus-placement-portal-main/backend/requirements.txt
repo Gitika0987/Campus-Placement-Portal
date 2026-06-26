@@ -1,0 +1,19 @@
+# ─────────────────────────────────────────────
+# Backend Python Dependencies
+# ─────────────────────────────────────────────
+# Install all of these with ONE command:
+#   pip install -r requirements.txt
+#
+# WHAT EACH PACKAGE DOES:
+# ─────────────────────────────────────────────
+
+# Flask — the web framework that runs our server
+flask==3.0.3
+
+# flask-cors — allows the frontend to talk to the backend
+# (browsers block cross-origin requests without this)
+flask-cors==4.0.1
+
+# locust — load testing framework for simulating peak traffic
+# Run with: locust -f load_testing/locustfile.py
+locust==2.29.1
